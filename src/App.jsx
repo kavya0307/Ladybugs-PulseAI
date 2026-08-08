@@ -14,9 +14,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('feed');
   const [isInitializing, setIsInitializing] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
+  const [allowManualTrigger, setAllowManualTrigger] = useState(false);
 
   // Initial load
   useEffect(() => {
+    // Check whether manual triggering is enabled for this deployment (dev-only feature)
+    fetch('/api/agent/config')
+      .then(res => res.json())
+      .then(cfg => setAllowManualTrigger(!!cfg.allowManualTrigger))
+      .catch(() => setAllowManualTrigger(false));
+
     // Check if we need to auto-init Ada default persona
     fetchStatusAndFeed(agentId);
 
@@ -102,6 +109,7 @@ export default function App() {
         onRefresh={() => fetchStatusAndFeed(agentId)}
         onTrigger={handleTriggerCycle}
         isTriggering={isTriggering}
+        allowManualTrigger={allowManualTrigger}
       />
 
       <main className="max-w-7xl mx-auto px-6 flex-1 w-full space-y-6">

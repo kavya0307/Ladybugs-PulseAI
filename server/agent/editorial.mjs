@@ -6,6 +6,36 @@
 import { checkMemoryDeduplication } from './memory.mjs';
 
 /**
+ * Very lightweight stemmer so keyword matching survives simple plural/suffix
+ * variation (e.g. persona keyword "vulnerability" should still match text
+ * containing "vulnerabilities"). This is intentionally simple - not a real
+ * NLP stemmer - just enough to stop obvious on-topic matches from being missed.
+ */
+function stem(word) {
+  return word
+    .toLowerCase()
+    .replace(/ies$/, 'y')     // vulnerabilities -> vulnerability(-ish: vulnerabilit-y)
+    .replace(/ing$/, '')      // scaling -> scal
+    .replace(/(e?s)$/, '');   // systems -> system, models -> model
+}
+
+/**
+ * Returns true if keyword `kw` meaningfully appears in `text`, allowing for
+ * simple singular/plural and suffix variation in either direction.
+ */
+function fuzzyKeywordMatch(text, kw) {
+  const kwLower = kw.toLowerCase();
+  if (text.includes(kwLower)) return true;
+
+  const kwStem = stem(kwLower);
+  if (kwStem.length < 3) return false; // avoid over-matching very short stems
+
+  // Check the stem against every word in the text (also stemmed)
+  const words = text.split(/[^a-z0-9]+/).filter(Boolean);
+  return words.some(w => stem(w) === kwStem || w.startsWith(kwStem));
+}
+
+/**
  * Evaluates candidate topics against persona criteria and memory.
  * Returns evaluated candidates categorized into approved and rejected with explicit rationales.
  */
@@ -54,7 +84,7 @@ export function evaluateTopics(candidates, persona, memory) {
     let matchedKeywords = [];
 
     for (const kw of domainKeywords) {
-      if (textCombined.includes(kw)) {
+      if (fuzzyKeywordMatch(textCombined, kw)) {
         relevanceScore += 15;
         matchedKeywords.push(kw);
       }

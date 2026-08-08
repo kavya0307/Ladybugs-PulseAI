@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bot, RefreshCw, Zap, Shield, Sparkles } from 'lucide-react';
 
-export default function Header({ agentStatus, onRefresh, onTrigger, isTriggering }) {
+export default function Header({ agentStatus, onRefresh, onTrigger, isTriggering, allowManualTrigger }) {
   const persona = agentStatus?.persona || { name: 'Ada', domain: 'AI Security' };
   const isEvaluating = agentStatus?.status === 'EVALUATING';
 
@@ -59,15 +59,17 @@ export default function Header({ agentStatus, onRefresh, onTrigger, isTriggering
             Refresh
           </button>
 
-          <button
-            onClick={onTrigger}
-            disabled={isTriggering || isEvaluating}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-lg shadow-cyan-500/20 transition disabled:opacity-50"
-            title="Manually trigger an immediate autonomous discovery & publishing tick"
-          >
-            <Zap className={`w-3.5 h-3.5 ${isTriggering || isEvaluating ? 'animate-spin' : ''}`} />
-            {isTriggering || isEvaluating ? 'Evaluating Candidates...' : 'Run Autonomous Cycle'}
-          </button>
+          {allowManualTrigger && (
+            <button
+              onClick={onTrigger}
+              disabled={isTriggering || isEvaluating}
+              className="flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20 transition disabled:opacity-50"
+              title="DEV ONLY — manually trigger a cycle for local testing. Not used during autonomous evaluation."
+            >
+              <Zap className={`w-3.5 h-3.5 ${isTriggering || isEvaluating ? 'animate-spin' : ''}`} />
+              {isTriggering || isEvaluating ? 'Evaluating Candidates...' : 'Dev: Run Cycle Now'}
+            </button>
+          )}
         </div>
 
       </div>
