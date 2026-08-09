@@ -15,14 +15,18 @@ export default function App() {
   const [isInitializing, setIsInitializing] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
   const [allowManualTrigger, setAllowManualTrigger] = useState(false);
+  const [llmEnabled, setLlmEnabled] = useState(false);
 
   // Initial load
   useEffect(() => {
     // Check whether manual triggering is enabled for this deployment (dev-only feature)
     fetch('/api/agent/config')
       .then(res => res.json())
-      .then(cfg => setAllowManualTrigger(!!cfg.allowManualTrigger))
-      .catch(() => setAllowManualTrigger(false));
+      .then(cfg => {
+        setAllowManualTrigger(!!cfg.allowManualTrigger);
+        setLlmEnabled(!!cfg.llmEnabled);
+      })
+      .catch(() => { setAllowManualTrigger(false); setLlmEnabled(false); });
 
     // Check if we need to auto-init Ada default persona
     fetchStatusAndFeed(agentId);
@@ -110,6 +114,7 @@ export default function App() {
         onTrigger={handleTriggerCycle}
         isTriggering={isTriggering}
         allowManualTrigger={allowManualTrigger}
+        llmEnabled={llmEnabled}
       />
 
       <main className="max-w-7xl mx-auto px-6 flex-1 w-full space-y-6">

@@ -3,6 +3,7 @@
  * Exposes required POST /api/agent/init and GET /api/agent/feed endpoints.
  */
 
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -10,6 +11,7 @@ import { fileURLToPath } from 'url';
 import { initAgent, getAgentFeed, getAgentStatus, runAutonomousCycle } from './agent/runner.mjs';
 import { PRESET_PERSONAS } from './agent/persona.mjs';
 import { getStore } from './agent/memory.mjs';
+import { isLLMAvailable } from './agent/llm.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -99,7 +101,10 @@ app.post('/api/agent/trigger', async (req, res) => {
 
 // Lets the frontend know whether the manual trigger button should render at all
 app.get('/api/agent/config', (req, res) => {
-  return res.json({ allowManualTrigger: process.env.ALLOW_MANUAL_TRIGGER === 'true' });
+  return res.json({
+    allowManualTrigger: process.env.ALLOW_MANUAL_TRIGGER === 'true',
+    llmEnabled: isLLMAvailable()
+  });
 });
 
 // Get available preset personas
@@ -153,6 +158,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Autonomous AI Creator API Server running on port ${PORT}`);
   console.log(`- POST /api/agent/init`);
   console.log(`- GET  /api/agent/feed?agentId=...`);
+  console.log(`🧠 LLM-powered editorial judgment & writing: ${isLLMAvailable() ? 'ENABLED (Claude)' : 'DISABLED - using deterministic template fallback'}`);
   console.log(`====================================================`);
   rehydrateActiveAgents();
 });

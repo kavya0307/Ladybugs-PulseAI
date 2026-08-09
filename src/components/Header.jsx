@@ -1,7 +1,7 @@
 import React from 'react';
-import { Bot, RefreshCw, Zap, Shield, Sparkles } from 'lucide-react';
+import { Bot, RefreshCw, Zap, Shield, Sparkles, BrainCircuit } from 'lucide-react';
 
-export default function Header({ agentStatus, onRefresh, onTrigger, isTriggering, allowManualTrigger }) {
+export default function Header({ agentStatus, onRefresh, onTrigger, isTriggering, allowManualTrigger, llmEnabled }) {
   const persona = agentStatus?.persona || { name: 'Ada', domain: 'AI Security' };
   const isEvaluating = agentStatus?.status === 'EVALUATING';
 
@@ -22,6 +22,21 @@ export default function Header({ agentStatus, onRefresh, onTrigger, isTriggering
               <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center gap-1">
                 <Sparkles className="w-3 h-3" /> Autonomous Persona
               </span>
+              {llmEnabled ? (
+                <span
+                  className="px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center gap-1"
+                  title="Editorial judgment and post writing are performed by a live Claude model call, not hardcoded templates."
+                >
+                  <BrainCircuit className="w-3 h-3" /> AI-Powered Judgment
+                </span>
+              ) : (
+                <span
+                  className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-700/40 text-slate-400 border border-slate-600/30 flex items-center gap-1"
+                  title="No ANTHROPIC_API_KEY configured - running on deterministic rule-based fallback."
+                >
+                  Template Mode
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-400">
               Self-directed topic discovery, editorial judgment & periodic publishing

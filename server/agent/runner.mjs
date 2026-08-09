@@ -72,7 +72,7 @@ export async function runAutonomousCycle(agentId) {
     console.log(`[Agent ${agentId}] Discovered ${freshCandidates.length} candidate topics for evaluation.`);
 
     // 2. Perform Editorial Evaluation
-    const evaluated = evaluateTopics(freshCandidates, persona, memory);
+    const evaluated = await evaluateTopics(freshCandidates, persona, memory);
 
     const approvedList = evaluated.filter(e => e.status === 'APPROVED');
     const rejectedList = evaluated.filter(e => e.status === 'REJECTED');
@@ -87,7 +87,9 @@ export async function runAutonomousCycle(agentId) {
       approvedList.sort((a, b) => b.score - a.score);
       const topApproved = approvedList[0];
 
-      newPostCreated = generatePost(topApproved, rejectedList, persona, memory.posts.length + 1);
+      newPostCreated = await generatePost(topApproved, rejectedList, persona, memory.posts.length + 1);
+      console.log(`[Agent ${agentId}] ✍️ Post written by: ${newPostCreated._writtenBy}`);
+      delete newPostCreated._writtenBy; // internal debug field only, not part of the public API contract
 
       console.log(`[Agent ${agentId}] 📝 Published new post ID: ${newPostCreated.id}`);
     } else {
